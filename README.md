@@ -64,7 +64,9 @@ to create a user
 ## Prisma commands
 
 npx prisma generate: to generate prisma client
+
 npx migrate dev --name <migration_name>: to migrate from database
+
 npx prism studio: to open the prisma interface
 
 ## To run test
@@ -73,5 +75,6 @@ npm test:int
 
 ## All test file located inside the test folder in each module
 
-##Postman documentation
+## Postman documentation
+
 inside the file checkit.postman_collection.json
