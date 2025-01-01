@@ -23,5 +23,7 @@ Order history and tracking logs
 
 ## Installation
 
+git clone https://github.com/Adebobol/checkit-Adepoju.git
+
 To set up the project locally, follow these steps:
 To install all the dependencies, type npm install in the root directory
