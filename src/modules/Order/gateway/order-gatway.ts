@@ -8,6 +8,7 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ChatRoomService } from '../chatRoom.service';
 
 @WebSocketGateway({ cors: true }) // Enable CORS if your frontend connects from a different origin
 export class OrderGateway
@@ -31,20 +32,14 @@ export class OrderGateway
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  // Emit order created event
-  sendOrderCreatedMessage(order: any) {
-    if (!this.server) {
-      console.error('WebSocket server is not initialized');
-      setTimeout(() => {
-        this.sendOrderCreatedMessage(order); // Retry after 1 second
-      }, 1000);
-      return;
-    }
-    console.log('Emitting orderCreated message:', order);
-    this.server.emit('orderCreated', order); // Broadcast to all connected clients
+  chatRoomCreated(user: string, chatRoomId: number) {
+    this.server.emit('chatroom created', `${user} created a chat room.`);
   }
 
   sendMessage(chatRoomId: number, sender: string, message: string) {
-    this.server.emit('sent message', `${sender}:${message}`);
+    this.server.emit(
+      'send message',
+      `${sender}:${message} in chatroom_${chatRoomId}`,
+    );
   }
 }

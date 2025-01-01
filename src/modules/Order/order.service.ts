@@ -8,10 +8,19 @@ import { OrderGateway } from './gateway/order-gatway';
 export class OrderService {
   constructor(
     private prisma: PrismaService,
+    private chatRoomService: ChatRoomService,
     private orderGateway: OrderGateway,
   ) {}
 
   async createOrder(userId: number, orderData) {
+    const loggedInUser = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!loggedInUser) {
+      throw new Error("Can't create order. Login");
+    }
+
     const Data: Prisma.OrderCreateInput = {
       description: orderData.description,
       specifications: orderData.specifications,
@@ -31,17 +40,11 @@ export class OrderService {
       throw new Error('Order not created');
     }
 
-    const admin = await this.prisma.user.findFirst({
-      where: { role: 'ADMIN' },
-    });
+    const chatRoom = await this.chatRoomService.createChatRoom(
+      userId,
+      order.id,
+    );
 
-    const chatRoom = await this.prisma.chatRoom.create({
-      data: {
-        orderId: order.id,
-        participantId: +userId,
-        adminId: admin.id,
-      },
-    });
     if (!chatRoom) {
       throw new Error('Chat room not created');
     }
@@ -51,10 +54,7 @@ export class OrderService {
       data: { chatRoomId: chatRoom.id },
     });
 
-    // this.orderGateway.sendOrderCreatedMessage({
-    //   order: updateOrder,
-    //   chatRoom,
-    // });
+    // this.orderGateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
 
     return updateOrder;
   }

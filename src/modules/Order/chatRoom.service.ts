@@ -1,7 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { AuthModuleOptions } from '@nestjs/passport';
-import { Prisma, Role } from '@prisma/client';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 import { PrismaService } from '../prismaSrc/prisma.service';
 import { UserService } from '../user/user.service';
 import { OrderGateway } from './gateway/order-gatway';
@@ -12,11 +9,18 @@ import { OrderService } from './order.service';
 export class ChatRoomService {
   constructor(
     private readonly prisma: PrismaService,
-    // private userService: UserService,
-    private gateWay: OrderGateway,
+    private gateway: OrderGateway,
   ) {}
 
   async createChatRoom(userId: number, orderId: number) {
+    const loggedInUser = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!loggedInUser) {
+      throw new Error("Can't create order. Login");
+    }
+
     const admin = await this.prisma.user.findFirst({
       where: { role: 'ADMIN' },
     });
@@ -31,6 +35,8 @@ export class ChatRoomService {
     if (!chatRoom) {
       throw new Error('Chat room not created');
     }
+
+    // this.gateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
 
     return chatRoom;
   }
@@ -113,7 +119,7 @@ export class ChatRoomService {
       },
     });
 
-    // this.gateWay.sendMessage(chatRoom.id, sender.role, message.content);
+    // this.gateway.sendMessage(chatRoom.id, sender.name, message.content);
 
     return message;
   }

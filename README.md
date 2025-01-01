@@ -47,13 +47,6 @@ to create a user
 "password":"1234"
 }
 
-## To login as admin
-
-{
-"email":"admin@email.com",
-"password":"1234"
-}
-
 ## To login as user
 
 {
