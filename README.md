@@ -69,3 +69,6 @@ to create a user
 ## To run test 
 
 npm test:int
+
+##Postman documentation
+inside the file checkit.postman_collection.json
