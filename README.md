@@ -27,3 +27,41 @@ git clone https://github.com/Adebobol/checkit-Adepoju.git
 
 To set up the project locally, follow these steps:
 To install all the dependencies, type npm install in the root directory
+
+npm run start:dev(to start the development server)
+
+## Usage
+
+After setting up the project, you can:
+
+Access the app at http://localhost:3000
+Log in as an admin to manage orders
+Create and update orders as necessary
+
+##Admin body
+to create an admin
+{
+    "name":"admin",
+    "email":"admin@email.com",
+    "password":"1234"
+    "role": "ADMIN'
+}
+
+to create a user
+{
+    "name":"test",
+    "email":"test@email.com",
+    "password":"1234"
+}
+
+## To login as admin
+{
+    "email":"admin@email.com",
+    "password":"1234"
+}
+
+## To login as user
+{
+    "email":"test@email.com",
+    "password":"1234"
+}
