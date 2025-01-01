@@ -2,13 +2,6 @@
 
 Checkit is an order management system designed to streamline and simplify the process of managing and tracking orders in a business environment.
 
-## Table of Contents
-
-Introduction
-Features
-Installation
-Usage
-
 ## Introduction
 
 Checkit helps businesses manage orders efficiently by providing a streamlined system for tracking, updating, and processing customer orders. It offers a user-friendly interface, order status updates, and integration with backend systems.
@@ -41,31 +34,41 @@ Create and update orders as necessary
 ##Admin body
 to create an admin
 {
-    "name":"admin",
-    "email":"admin@email.com",
-    "password":"1234"
-    "role": "ADMIN'
+"name":"admin",
+"email":"admin@email.com",
+"password":"1234"
+"role": "ADMIN'
 }
 
 to create a user
 {
-    "name":"test",
-    "email":"test@email.com",
-    "password":"1234"
+"name":"test",
+"email":"test@email.com",
+"password":"1234"
 }
 
 ## To login as admin
+
 {
-    "email":"admin@email.com",
-    "password":"1234"
+"email":"admin@email.com",
+"password":"1234"
 }
 
 ## To login as user
+
 {
-    "email":"test@email.com",
-    "password":"1234"
+"email":"test@email.com",
+"password":"1234"
 }
 
-## To run test 
+## Prisma commands
+
+npx prisma generate: to generate prisma client
+npx migrate dev --name <migration_name>: to migrate from database
+npx prism studio: to open the prisma interface
+
+## To run test
 
 npm test:int
+
+## All test file located inside the test folder in each module
