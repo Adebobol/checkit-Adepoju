@@ -1,5 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from 'src/ErrorHandler/customError';
 import { PrismaService } from '../prismaSrc/prisma.service';
 import { ChatRoomService } from './chatRoom.service';
 import { OrderGateway } from './gateway/order-gatway';
@@ -13,50 +17,63 @@ export class OrderService {
   ) {}
 
   async createOrder(userId: number, orderData) {
-    const loggedInUser = await this.prisma.user.findFirst({
-      where: { id: userId },
-    });
+    try {
+      const loggedInUser = await this.prisma.user.findFirst({
+        where: { id: userId },
+      });
 
-    if (!loggedInUser) {
-      throw new Error("Can't create order. Login");
+      if (!loggedInUser) {
+        throw new UnauthorizedError(
+          'Unauthorized: Please log in to create an order.',
+        );
+      }
+
+      if (!orderData.description || !orderData.quantity) {
+        throw new BadRequestError(
+          "Invalid order data. 'Description' and 'Quantity' are required.",
+        );
+      }
+
+      const Data: Prisma.OrderCreateInput = {
+        description: orderData.description,
+        specifications: orderData.specifications || '',
+        quantity: orderData.quantity,
+        metadata: orderData.metadata || {},
+        status: 'REVIEW',
+        owner: {
+          connect: { id: userId },
+        },
+      };
+
+      const order = await this.prisma.order.create({
+        data: Data,
+      });
+
+      if (!order) {
+        throw new Error('Could not create order.');
+      }
+
+      const chatRoom = await this.chatRoomService.createChatRoom(
+        userId,
+        order.id,
+      );
+
+      if (!chatRoom) {
+        throw new Error('Chat room not created create order again.');
+      }
+
+      const updateOrder = await this.prisma.order.update({
+        where: { id: order.id },
+        data: { chatRoomId: chatRoom.id },
+        include: { chatRoom: true },
+      });
+
+      // this.orderGateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
+
+      return updateOrder;
+    } catch (error) {
+      console.log(`Error creating order: ${error}`);
     }
-
-    const Data: Prisma.OrderCreateInput = {
-      description: orderData.description,
-      specifications: orderData.specifications,
-      quantity: orderData.quantity,
-      metadata: orderData.metadata,
-      status: 'REVIEW',
-      owner: {
-        connect: { id: userId },
-      },
-    };
-
-    const order = await this.prisma.order.create({
-      data: Data,
-    });
-
-    if (!order) {
-      throw new Error('Order not created');
-    }
-
-    const chatRoom = await this.chatRoomService.createChatRoom(
-      userId,
-      order.id,
-    );
-
-    if (!chatRoom) {
-      throw new Error('Chat room not created');
-    }
-
-    const updateOrder = await this.prisma.order.update({
-      where: { id: order.id },
-      data: { chatRoomId: chatRoom.id },
-    });
-
-    // this.orderGateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
-
-    return updateOrder;
   }
 
   async getOrder(userId: number, orderId: number) {
@@ -64,9 +81,15 @@ export class OrderService {
       throw new Error('Order ID is required');
     }
 
-    const order = this.prisma.order.findFirst({ where: { id: +orderId } });
+    const order = await this.prisma.order.findFirst({
+      where: { id: +orderId },
+    });
 
-    if ((await order).ownerId !== userId) {
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.ownerId !== userId) {
       throw new Error("You can't access order.");
     }
 
@@ -74,9 +97,11 @@ export class OrderService {
   }
 
   async getAllOrder(userId: number) {
-    const isAdmin = await this.prisma.user.findFirst({ where: { id: userId } });
+    const isAdmin = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
 
-    if (!isAdmin && isAdmin.role !== 'ADMIN') {
+    if (!isAdmin || isAdmin.role !== 'ADMIN') {
       throw new Error("You don't have access to this route");
     }
 
@@ -84,22 +109,24 @@ export class OrderService {
   }
 
   async orderCompleted(userId: number, orderId: number) {
-    const admin = this.prisma.user.findFirst({ where: { id: userId } });
+    const admin = await this.prisma.user.findFirst({ where: { id: userId } });
+
+    console.log(admin.role);
+
+    if (!admin && admin.role !== 'ADMIN') {
+      throw new Error('Only admin can gain access.');
+    }
 
     const order = await this.prisma.order.findFirst({
       where: { id: +orderId },
     });
 
-    if (!admin && (await admin).role !== 'ADMIN') {
-      throw new Error("Can't mark order completed.");
-    }
-
     if (!order) {
       throw new Error('No order found');
     }
 
-    if (order.status !== 'REVIEW') {
-      throw new Error("Can't mark order completed.");
+    if (order.status !== 'PROCESSING') {
+      throw new Error("Can't mark order completed. Order still processing.");
     }
     return await this.prisma.order.update({
       where: { id: +orderId },
@@ -108,17 +135,22 @@ export class OrderService {
   }
 
   async deleteOrder(userId: number, orderId: number) {
-    const order = await this.prisma.order.delete({ where: { id: +orderId } });
-
-    if (!order) {
-      throw new Error('No order found');
+    console.log(typeof orderId);
+    let order;
+    let loggedInUser;
+    try {
+      loggedInUser = await this.prisma.user.findFirst({
+        where: { id: userId },
+      });
+      order = await this.prisma.order.delete({ where: { id: +orderId } });
+    } catch (error) {
+      throw new Error('No order found or deleted');
     }
 
-    if ((await order).ownerId !== userId) {
-      throw new Error("You can't access order.");
+    if (order.ownerId !== userId && loggedInUser.role !== 'ADMIN') {
+      throw new Error("You can't delete this order.");
     }
 
-    // return { message: 'Order deleted' };
-    return null;
+    return { message: 'Order deleted' };
   }
 }

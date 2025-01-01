@@ -28,18 +28,18 @@ export class OrderController {
     return await this.orderService.createOrder(req.user.id, orderData);
   }
 
+  // get all order route
+  @UseGuards(AuthGuard('jwt'))
+  @Get('orders')
+  async getAllOrder(@Request() req: any) {
+    return await this.orderService.getAllOrder(req.user.id);
+  }
+
   // get order route
   @UseGuards(AuthGuard('jwt'))
   @Get('order/:id')
   async getOrder(@Request() req: any, @Param('id') id: number) {
     return await this.orderService.getOrder(req.user.id, id);
-  }
-
-  // get all order route
-  @UseGuards(AuthGuard('jwt'))
-  @Get('order')
-  async getAllOrder(@Request() req: any) {
-    return await this.orderService.getAllOrder(req.user.id);
   }
 
   // delete an order route

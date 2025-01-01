@@ -13,33 +13,71 @@ export class ChatRoomService {
   ) {}
 
   async createChatRoom(userId: number, orderId: number) {
+    // Find the logged-in user
     const loggedInUser = await this.prisma.user.findFirst({
       where: { id: userId },
     });
 
     if (!loggedInUser) {
-      throw new Error("Can't create order. Login");
+      throw new Error('User not logged in or does not exist.');
     }
 
+    // Find the admin
     const admin = await this.prisma.user.findFirst({
       where: { role: 'ADMIN' },
     });
 
+    if (!admin) {
+      throw new Error('Admin user not found. Ensure the system has an admin.');
+    }
+
     const chatRoom = await this.prisma.chatRoom.create({
       data: {
-        orderId: orderId,
-        participantId: +userId,
+        orderId,
+        participantId: userId,
         adminId: admin.id,
       },
     });
+
     if (!chatRoom) {
-      throw new Error('Chat room not created');
+      throw new Error('Failed to create chat room.');
     }
 
-    // this.gateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
+    // if (this.gateway && this.gateway.chatRoomCreated) {
+    //   this.gateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
+    // }
 
     return chatRoom;
   }
+
+  // async createChatRoom(userId: number, orderId: number) {
+  //   const loggedInUser = await this.prisma.user.findFirst({
+  //     where: { id: userId },
+  //   });
+
+  //   if (!loggedInUser) {
+  //     throw new Error("Can't create order. Login");
+  //   }
+
+  //   const admin = await this.prisma.user.findFirst({
+  //     where: { role: 'ADMIN' },
+  //   });
+
+  //   const chatRoom = await this.prisma.chatRoom.create({
+  //     data: {
+  //       orderId: orderId,
+  //       participantId: +userId,
+  //       adminId: admin.id,
+  //     },
+  //   });
+  //   if (!chatRoom) {
+  //     throw new Error('Chat room not created');
+  //   }
+
+  //   // this.gateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
+
+  //   return chatRoom;
+  // }
 
   async getChatRoom(userId: number, chatRoomId: number) {
     const loggedInUser = await this.prisma.user.findFirst({

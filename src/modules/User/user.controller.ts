@@ -6,8 +6,12 @@ import {
   NotFoundException,
   Param,
   Post,
+  Request,
   Put,
+  UseGuards,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
+import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -21,6 +25,14 @@ export class UserController {
     return await this.userService.createUser(data);
   }
 
+  @Post('create/admin')
+  async createAdmin(
+    @Body() data: { name: string; email: string; password: string },
+  ) {
+    return await this.userService.createAdmin(data);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async user(@Body() data) {
     const { email, ...rest } = data;
@@ -33,17 +45,15 @@ export class UserController {
   }
 
   //updating a user
-  @Put('/:id')
-  async updateUser(
-    @Param('id') id: number,
-    @Body() data: { name: string; email: string; password: string },
-  ) {
-    const updateData = { id, data };
-    return this.userService.updateUser(updateData);
+  @UseGuards(AuthGuard('jwt'))
+  @Put()
+  async updateUser(@Request() req: any, @Body() data: { name: string }) {
+    return this.userService.updateUser(req.user.id, data);
   }
 
-  @Delete('/:id')
-  async deleteUser(@Param('id') id: number) {
-    return this.userService.deleteUser(id);
+  @UseGuards(AuthGuard('jwt'))
+  @Delete()
+  async deleteUser(@Request() req: any) {
+    return this.userService.deleteUser(req.user.id);
   }
 }

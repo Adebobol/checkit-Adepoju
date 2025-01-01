@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import createHttpError from 'http-errors';
+import { Prisma, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prismaSrc/prisma.service';
 
@@ -8,10 +9,19 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   // creating a user
-  async createUser(data) {
+  async createUser(data: { name: string; email: string; password: string }) {
     if (!data.email || !data.password || !data.name) {
-      throw new Error('All fields are required');
+      throw createHttpError(400, 'All fields are required');
     }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new Error('Email is already in use');
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     return this.prisma.user.create({
@@ -19,16 +29,23 @@ export class UserService {
         name: data.name,
         email: data.email,
         password: hashedPassword,
-        role: data.role,
       },
     });
   }
 
-  // creating an admin
-  async createAdmin(data) {
+  async createAdmin(data: { name: string; email: string; password: string }) {
     if (!data.email || !data.password || !data.name) {
-      throw new Error('All fields are required');
+      throw createHttpError(400, 'All fields are required');
     }
+
+    const existingAdmin = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingAdmin) {
+      throw new Error('Admin with email already in use.');
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     return this.prisma.user.create({
@@ -41,17 +58,11 @@ export class UserService {
     });
   }
 
-  // creating an admin
-  async getAdmin() {
-    const admin = this.prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    return admin;
-  }
-
   // get a user
   async user(email: string) {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { email: email },
+        where: { email },
       });
 
       if (!user) {
@@ -60,8 +71,9 @@ export class UserService {
 
       return user;
     } catch (error) {
-      console.error('Error fetching user:', error);
-      throw new Error('Failed to fetch user');
+      throw new Error(
+        error.message || 'An unexpected error occurred while fetching the user',
+      );
     }
   }
 
@@ -71,27 +83,22 @@ export class UserService {
   }
 
   //updating a user
-  async updateUser(updateData) {
-    const { id, data } = updateData;
-
-    if (Object.keys(data).length === 0) {
-      throw new Error('No data found');
+  async updateUser(userId: number, data: { name: string }) {
+    if (!data || Object.keys(data).length === 0) {
+      throw new Error('No name data found to update.');
     }
 
-    if (data.password || data.email) {
-      throw new Error("You can't update your password and email");
-    }
-
-    const user = await this.prisma.user.findFirst({ where: { id: +id } });
+    const user = await this.prisma.user.findUnique({ where: { id: +userId } });
     if (!user) {
       throw new Error("User doesn't exist.");
     }
-    const updateUser = await this.prisma.user.update({
-      where: { id: +id },
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
       data,
     });
 
-    return updateUser;
+    return updatedUser;
   }
 
   async deleteUser(id: number) {
