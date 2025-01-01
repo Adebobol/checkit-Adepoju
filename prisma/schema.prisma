@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+
+enum Status {
+  REVIEW
+  PROCESSING
+  COMPLETED
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  email String @unique
+
+  password String
+
+  role Role @default(USER)
+
+  chatRoomsAsAdmin      ChatRoom[] @relation("Admin")
+
+  chatRoomsAsParticipant ChatRoom[] @relation("Participant")
+
+  order Order[]
+
+  @@map("users")
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  description String
+
+  specifications String
+
+  quantity Int
+
+  metadata Json
+
+  ownerId Int
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  chatRoom ChatRoom?
+  
+  chatRoomId   Int?
+
+  status Status @default(REVIEW)
+
+  createdAt      DateTime @default(now())
+
+  updatedAt      DateTime @updatedAt
+
+
+  @@index([ownerId,createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Asc)])
+  @@map("orders")
+
+}
+
+model ChatRoom {
+  id Int @id @default(autoincrement())
+
+  orderId Int @unique
+
+  order  Order @relation(fields: [orderId], references: [id],onDelete: Cascade)
+
+  adminId Int 
+
+  admin User @relation("Admin",fields: [adminId], references: [id])
+
+  participantId Int
+
+  participant User @relation("Participant",fields: [participantId],references: [id], onDelete: Cascade)
+
+  isClosed Boolean @default(false)
+
+  summary String?   
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("chatrooms")
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+
+  content String
+
+  userId Int
+
+  createdAt DateTime @default(now())
+
+  chatRoomId Int
+
+  chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id],onDelete: Cascade)
+
+  @@index([chatRoomId,createdAt(sort: Desc)])
+  @@index([userId,createdAt(sort: Desc)])
+  @@index([chatRoomId])
+  @@map("messages")
+}
