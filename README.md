@@ -20,3 +20,8 @@ Admin dashboard for order management
 User authentication and role-based access control
 Integration with messaging services for notifications
 Order history and tracking logs
+
+## Installation
+
+To set up the project locally, follow these steps:
+To install all the dependencies, type npm install in the root directory
