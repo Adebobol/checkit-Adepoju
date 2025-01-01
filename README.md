@@ -65,3 +65,7 @@ to create a user
     "email":"test@email.com",
     "password":"1234"
 }
+
+## To run test 
+
+npm test:int
