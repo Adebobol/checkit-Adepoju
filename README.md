@@ -28,6 +28,8 @@ Integration with messaging services for notifications
 
 ## env file setup
 
+create a .env file in the root directory
+
 A .env.example file has been provided to fill in details
 
 JWT_SECRET="" =>put in any sentence in between the quotes
