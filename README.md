@@ -73,7 +73,7 @@ npx prism studio: to open the prisma interface
 
 npm test:int
 
-## All test file located inside the test folder in each module
+All test file located inside the test folder in each module they end with the marher .int-spec.ts
 
 ## Postman documentation
 
