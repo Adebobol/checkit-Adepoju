@@ -72,3 +72,6 @@ npx prism studio: to open the prisma interface
 npm test:int
 
 ## All test file located inside the test folder in each module
+
+##Postman documentation
+inside the file checkit.postman_collection.json
