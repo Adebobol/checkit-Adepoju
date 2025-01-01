@@ -31,15 +31,6 @@ Access the app at http://localhost:3000
 Log in as an admin to manage orders
 Create and update orders as necessary
 
-##Admin body
-to create an admin
-{
-"name":"admin",
-"email":"admin@email.com",
-"password":"1234"
-"role": "ADMIN'
-}
-
 to create a user
 {
 "name":"test",
