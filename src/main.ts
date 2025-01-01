@@ -12,7 +12,7 @@ async function bootstrap() {
   // custom filter
   app.useGlobalFilters(new CustomExceptionFilter());
   //
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT);
   connectToDatabase();
 }
 bootstrap();

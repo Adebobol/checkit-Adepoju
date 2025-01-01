@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function connectToDatabase() {
   try {
     await prisma.$disconnect();
-    console.log('Connected ');
+    console.log(`Prisma connected\nApp running on port ${process.env.PORT}`);
   } catch (error) {
     console.error('Error');
   } finally {

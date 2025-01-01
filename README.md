@@ -26,6 +26,16 @@ Create, update, get, delete and mark completed orders in real time
 User authentication and role-based access control
 Integration with messaging services for notifications
 
+## env file setup
+
+A .env.example file has been provided to fill in details
+
+JWT_SECRET="" =>put in any sentence in between the quotes
+
+PORT=port => port shoulb be a number of 4 digits
+
+EXPIRES_IN => this specifies the max day before a users token is still available for. either in seconds or days. Set it to be 1s or 1d
+
 ## Installation
 
 git clone https://github.com/Adebobol/checkit-Adepoju.git
