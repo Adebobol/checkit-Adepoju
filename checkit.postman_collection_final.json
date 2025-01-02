@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"kehinde\",\r\n    \"email\":\"kehinde@email.com\",\r\n    \"password\":\"1234\"\r\n}",
+              "raw": "{\r\n    \"name\":\"ade\",\r\n    \"email\":\"ade@email.com\",\r\n    \"password\":\"1234\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -41,11 +41,21 @@
             "disableBodyPruning": true
           },
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"adepoju@email.com\"\r\n}",
+              "raw": "{\r\n    \"email\":\"kehinde@email.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -65,9 +75,31 @@
         },
         {
           "name": "get all users",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "http://localhost:3000/user/all",
               "protocol": "http",
@@ -82,11 +114,21 @@
         {
           "name": "updating a user ",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"test\"\r\n}",
+              "raw": "{\r\n    \"name\":\"kehinde\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -94,11 +136,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/user/1",
+              "raw": "http://localhost:3000/user",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["user", "1"]
+              "path": ["user"]
             },
             "description": "Updating a user. This can only perform updating name alone."
           },
@@ -107,16 +149,51 @@
         {
           "name": "deleting a user",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/user/2",
+              "raw": "http://localhost:3000/user",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["user", "2"]
+              "path": ["user"]
             },
             "description": "Deleting a user."
+          },
+          "response": []
+        },
+        {
+          "name": "create an admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"admin\",\r\n    \"email\":\"admin@email.com\",\r\n    \"password\":\"1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/user/create/admin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["user", "create", "admin"]
+            },
+            "description": "Request to create an admin"
           },
           "response": []
         }
@@ -145,7 +222,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\":\"admin@email.com\",\r\n    \"password\":\"1234\"\r\n}",
+              "raw": "{\r\n    \"email\":\"kehinde@email.com\",\r\n    \"password\":\"1234\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -233,14 +310,24 @@
         {
           "name": "mark an order \"completed\"",
           "request": {
-            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/order/completed/1",
+              "raw": "http://localhost:3000/order/completed/9",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["order", "completed", "1"]
+              "path": ["order", "completed", "9"]
             },
             "description": "This request is specially for the admin to mark an order completed after it has been reviewed and processed."
           },
@@ -288,11 +375,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/order",
+              "raw": "http://localhost:3000/orders",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["order"]
+              "path": ["orders"]
             },
             "description": "Only an admin has access to get all orders."
           },
@@ -314,11 +401,11 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/order/1",
+              "raw": "http://localhost:3000/order/3",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["order", "1"]
+              "path": ["order", "3"]
             },
             "description": "Deleting an order by the owner"
           },
@@ -347,7 +434,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"content\":\"Your order is being processed\"\r\n}",
+              "raw": "{\r\n    \"content\":\"Hi, i created an order\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -355,18 +442,18 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/message/221",
+              "raw": "http://localhost:3000/message/9",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["message", "221"]
+              "path": ["message", "9"]
             },
             "description": "Send a message after order has been created"
           },
           "response": []
         },
         {
-          "name": "close a message",
+          "name": "close a chatroom",
           "request": {
             "auth": {
               "type": "bearer",
@@ -390,13 +477,13 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/message/close/1",
+              "raw": "http://localhost:3000/message/close/9",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["message", "close", "1"]
+              "path": ["message", "close", "9"]
             },
-            "description": "Closing a chatroom by sending a summary of all the conversation between the user and admin. This is done by the admin."
+            "description": "Closing a chatroom by sending a summary and set order status to PROCESSING of all the conversation between the user and admin. This is done by the admin."
           },
           "response": []
         },
@@ -451,11 +538,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/chatroom/messages/1",
+              "raw": "http://localhost:3000/chatroom/messages/9",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["chatroom", "messages", "1"]
+              "path": ["chatroom", "messages", "9"]
             },
             "description": "get all messages of a chatroom. The \"1\" above is the id for the chatroom"
           },
@@ -477,11 +564,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/chatroom/1",
+              "raw": "http://localhost:3000/chatroom/9",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["chatroom", "1"]
+              "path": ["chatroom", "9"]
             },
             "description": "request for getting a chatroom. The \"1\" above is the id param for the chatroom"
           },
