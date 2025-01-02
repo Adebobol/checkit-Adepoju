@@ -93,11 +93,8 @@ export class OrderController {
     @Param('id') id: number,
     @Body() messageData,
   ) {
-    return await this.chatRoomService.closeChatRoom(
-      req.user.id,
-      id,
-      messageData,
-    );
+    const { summary } = messageData;
+    return await this.chatRoomService.closeChatRoom(req.user.id, id, summary);
   }
 
   @UseGuards(AuthGuard('jwt'))

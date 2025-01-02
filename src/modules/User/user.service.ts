@@ -83,10 +83,10 @@ export class UserService {
   }
 
   //updating a user
-  async updateUser(userId: number, data: { name: string }) {
-    if (!data || Object.keys(data).length === 0) {
-      throw new Error('No name data found to update.');
-    }
+  async updateUser(userId: number, name: string) {
+    // if (!data || Object.keys(data).length === 0) {
+    //   throw new Error('No name data found to update.');
+    // }
 
     const user = await this.prisma.user.findUnique({ where: { id: +userId } });
     if (!user) {
@@ -95,7 +95,7 @@ export class UserService {
 
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
-      data,
+      data: { name: name },
     });
 
     return updatedUser;

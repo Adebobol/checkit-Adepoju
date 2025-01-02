@@ -46,9 +46,9 @@ describe('User service Int', () => {
 
   describe('updateUser()', () => {
     it('should update a user, only the name of the user can be updated', async () => {
-      const updateData = { id: userId, data: { name: 'New Name' } };
-      console.log(updateData);
-      const user = await userService.updateUser(updateData);
+      const updatename = 'testUnit';
+
+      const user = await userService.updateUser(userId, updatename);
     });
   });
 

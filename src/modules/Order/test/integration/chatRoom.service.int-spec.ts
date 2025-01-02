@@ -90,6 +90,13 @@ describe('ChatRoom Servive Int', () => {
     });
   });
 
+  describe('closeChatRoom()', () => {
+    it('should close a chatroom and set status to PROCESSING', async () => {
+      const summary = 'Your order is being processed.';
+      await chatRoomService.closeChatRoom(adminId, chatRoomId, summary);
+    });
+  });
+
   describe('deletechatRoom()', () => {
     it('should get a chatroom', async () => {
       const chatRoom = await chatRoomService.deleteChatRoom(userId, chatRoomId);

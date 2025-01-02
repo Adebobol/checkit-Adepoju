@@ -50,35 +50,6 @@ export class ChatRoomService {
     return chatRoom;
   }
 
-  // async createChatRoom(userId: number, orderId: number) {
-  //   const loggedInUser = await this.prisma.user.findFirst({
-  //     where: { id: userId },
-  //   });
-
-  //   if (!loggedInUser) {
-  //     throw new Error("Can't create order. Login");
-  //   }
-
-  //   const admin = await this.prisma.user.findFirst({
-  //     where: { role: 'ADMIN' },
-  //   });
-
-  //   const chatRoom = await this.prisma.chatRoom.create({
-  //     data: {
-  //       orderId: orderId,
-  //       participantId: +userId,
-  //       adminId: admin.id,
-  //     },
-  //   });
-  //   if (!chatRoom) {
-  //     throw new Error('Chat room not created');
-  //   }
-
-  //   // this.gateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
-
-  //   return chatRoom;
-  // }
-
   async getChatRoom(userId: number, chatRoomId: number) {
     const loggedInUser = await this.prisma.user.findFirst({
       where: { id: userId },
@@ -118,9 +89,17 @@ export class ChatRoomService {
   }
 
   async sendMessage(userId: number, chatRoomId: number, messageData) {
+    const sender = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
     const chatRoom = await this.prisma.chatRoom.findUnique({
       where: { id: +chatRoomId },
     });
+
+    if (!chatRoom) {
+      throw new Error("You can't send message. Chatroom doesn't exist.");
+    }
 
     const order = await this.prisma.order.findFirst({
       where: { id: chatRoom.orderId },
@@ -130,12 +109,8 @@ export class ChatRoomService {
       throw new Error('Order does not exist.');
     }
 
-    const sender = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
     // Ensure user can only send messages in their own chat room
-    if ((await order).ownerId !== userId && sender.role !== 'ADMIN') {
+    if (order.ownerId !== userId && sender.role !== 'ADMIN') {
       throw new Error('You are not authorized to message in this chat room');
     }
 
@@ -163,10 +138,10 @@ export class ChatRoomService {
   }
 
   async getAllChatRoomMessages(userId: number, id: number) {
-    // const admin = await this.prisma.user.findFirst({ where: { id: userId } });
-    // if (admin.role !== 'ADMIN') {
-    //   throw new Error('Only admin can create chatroom');
-    // }
+    const loggedInUser = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
     const chatRoom = await this.prisma.chatRoom.findUnique({
       where: {
         id: +id,
@@ -175,10 +150,26 @@ export class ChatRoomService {
         messages: true,
       },
     });
+
+    if (!chatRoom) {
+      throw new Error("Chatroom doesn't exist.");
+    }
+
+    if (
+      loggedInUser.id !== chatRoom.participantId &&
+      loggedInUser.role !== 'ADMIN'
+    ) {
+      throw new Error('Only participants can access chatroom');
+    }
+
     return chatRoom.messages;
   }
 
-  async closeChatRoom(userId: number, chatRoomId: number, summaryMessageData) {
+  async closeChatRoom(userId: number, chatRoomId: number, summary: string) {
+    const loggedInUser = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
     let chatRoom = await this.prisma.chatRoom.findFirst({
       where: { id: +chatRoomId },
     });
@@ -187,17 +178,19 @@ export class ChatRoomService {
       throw new Error('Chat room not found');
     }
 
-    const admin = this.prisma.chatRoom.findFirst({ where: { id: userId } });
-
-    if (!admin) {
+    if (!loggedInUser || loggedInUser.role !== 'ADMIN') {
       throw new Error('Only admins can close chat rooms');
+    }
+
+    if (chatRoom.isClosed) {
+      throw new Error('Chat room already closed');
     }
 
     chatRoom = await this.prisma.chatRoom.update({
       where: { id: +chatRoomId },
       data: {
         isClosed: true,
-        summary: summaryMessageData.summary,
+        summary: summary,
       },
     });
 

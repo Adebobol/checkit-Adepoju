@@ -17,63 +17,63 @@ export class OrderService {
   ) {}
 
   async createOrder(userId: number, orderData) {
-    try {
-      const loggedInUser = await this.prisma.user.findFirst({
-        where: { id: userId },
-      });
+    const loggedInUser = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
 
-      if (!loggedInUser) {
-        throw new UnauthorizedError(
-          'Unauthorized: Please log in to create an order.',
-        );
-      }
-
-      if (!orderData.description || !orderData.quantity) {
-        throw new BadRequestError(
-          "Invalid order data. 'Description' and 'Quantity' are required.",
-        );
-      }
-
-      const Data: Prisma.OrderCreateInput = {
-        description: orderData.description,
-        specifications: orderData.specifications || '',
-        quantity: orderData.quantity,
-        metadata: orderData.metadata || {},
-        status: 'REVIEW',
-        owner: {
-          connect: { id: userId },
-        },
-      };
-
-      const order = await this.prisma.order.create({
-        data: Data,
-      });
-
-      if (!order) {
-        throw new Error('Could not create order.');
-      }
-
-      const chatRoom = await this.chatRoomService.createChatRoom(
-        userId,
-        order.id,
+    if (!loggedInUser) {
+      throw new UnauthorizedError(
+        'Unauthorized: Please log in to create an order.',
       );
-
-      if (!chatRoom) {
-        throw new Error('Chat room not created create order again.');
-      }
-
-      const updateOrder = await this.prisma.order.update({
-        where: { id: order.id },
-        data: { chatRoomId: chatRoom.id },
-        include: { chatRoom: true },
-      });
-
-      // this.orderGateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
-
-      return updateOrder;
-    } catch (error) {
-      console.log(`Error creating order: ${error}`);
     }
+    console.log(loggedInUser.role);
+    if (loggedInUser.role == 'ADMIN') {
+      throw new BadRequestError("Admin can't create order.");
+    }
+
+    if (!orderData.description || !orderData.quantity) {
+      throw new BadRequestError(
+        "Invalid order data. 'Description' and 'Quantity' are required.",
+      );
+    }
+
+    const Data: Prisma.OrderCreateInput = {
+      description: orderData.description,
+      specifications: orderData.specifications || '',
+      quantity: orderData.quantity,
+      metadata: orderData.metadata || {},
+      status: 'REVIEW',
+      owner: {
+        connect: { id: userId },
+      },
+    };
+
+    const order = await this.prisma.order.create({
+      data: Data,
+    });
+
+    if (!order) {
+      throw new Error('Could not create order.');
+    }
+
+    const chatRoom = await this.chatRoomService.createChatRoom(
+      userId,
+      order.id,
+    );
+
+    if (!chatRoom) {
+      throw new Error('Chat room not created create order again.');
+    }
+
+    const updateOrder = await this.prisma.order.update({
+      where: { id: order.id },
+      data: { chatRoomId: chatRoom.id },
+      include: { chatRoom: true },
+    });
+
+    // this.orderGateway.chatRoomCreated(loggedInUser.name, chatRoom.id);
+
+    return updateOrder;
   }
 
   async getOrder(userId: number, orderId: number) {
@@ -125,8 +125,8 @@ export class OrderService {
       throw new Error('No order found');
     }
 
-    if (order.status !== 'PROCESSING') {
-      throw new Error("Can't mark order completed. Order still processing.");
+    if (order.status !== 'REVIEW') {
+      throw new Error("Can't mark order completed. Order still in Review.");
     }
     return await this.prisma.order.update({
       where: { id: +orderId },

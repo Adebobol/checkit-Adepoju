@@ -48,7 +48,8 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Put()
   async updateUser(@Request() req: any, @Body() data: { name: string }) {
-    return this.userService.updateUser(req.user.id, data);
+    const { name } = data;
+    return this.userService.updateUser(req.user.id, name);
   }
 
   @UseGuards(AuthGuard('jwt'))
